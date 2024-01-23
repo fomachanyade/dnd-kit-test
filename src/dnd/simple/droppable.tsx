@@ -1,9 +1,11 @@
 import { useDroppable } from "@dnd-kit/core";
 import { ReactNode } from "react";
 
-export const Droppable = (props: { children: ReactNode }) => {
+export const Droppable = (props: { id: string; children: ReactNode }) => {
+	const { id, children } = props;
+
 	const { isOver, setNodeRef } = useDroppable({
-		id: "droppable",
+		id,
 	});
 	const style = {
 		color: isOver ? "green" : undefined,
@@ -11,7 +13,7 @@ export const Droppable = (props: { children: ReactNode }) => {
 
 	return (
 		<div ref={setNodeRef} style={style}>
-			{props.children}
+			{children}
 		</div>
 	);
 };

@@ -1,20 +1,28 @@
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { useState } from "react";
 import { Draggable } from "./draggable";
 import { Droppable } from "./droppable";
 
 export const Simple = () => {
-	const [isDropped, setIsDropped] = useState(false);
+	const containers = ["A", "B", "C"];
+	const [parent, setParent] = useState<UniqueIdentifier | null>(null);
 
 	const handleDragEnd = (event: DragEndEvent) => {
-		if (event.over && event.over.id === "droppable") {
-			setIsDropped(true);
-		}
+		const { over } = event;
+		setParent(over ? over.id : null);
 	};
+
+	const draggableMarkup = <Draggable id="draggable">Drag me</Draggable>;
+
 	return (
 		<DndContext onDragEnd={handleDragEnd}>
-			<Draggable>Drag me</Draggable>
-			<Droppable>Drop here</Droppable>
+			{parent === null ? draggableMarkup : null}
+
+			{containers.map((id) => (
+				<Droppable key={id} id={id}>
+					{parent === id ? draggableMarkup : "Drop here"}
+				</Droppable>
+			))}
 		</DndContext>
 	);
 };
