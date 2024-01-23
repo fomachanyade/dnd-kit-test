@@ -1,14 +1,14 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FC } from "react";
+import { Item } from "./item";
 
 export type SortableItemProps = {
 	id: number;
-	children?: React.ReactNode;
 };
 
 export const SortableItem: FC<SortableItemProps> = (props) => {
-	const { id, children } = props;
+	const { id } = props;
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id });
 
@@ -18,8 +18,8 @@ export const SortableItem: FC<SortableItemProps> = (props) => {
 	};
 
 	return (
-		<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-			{children ? children : <div style={{ margin: "10px 0" }}>Item {id}</div>}
+		<div style={{ ...style }} {...attributes} {...listeners}>
+			<Item ref={setNodeRef} id={id} />
 		</div>
 	);
 };
