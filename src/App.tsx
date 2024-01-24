@@ -18,7 +18,7 @@ function App() {
 			<div style={{ margin: "16 0" }}>
 				<h2>multiple containers</h2>
 				<MultipleContainers />
-				</div>
+			</div>
 		</div>
 	);
 }
