@@ -1,24 +1,38 @@
 import {
-	DndContext,
-	DragEndEvent,
-	DragOverEvent,
-	DragOverlay,
-	DragStartEvent,
-	UniqueIdentifier,
+    DndContext,
+    DragEndEvent,
+    DragOverEvent,
+    DragOverlay,
+    DragStartEvent,
+    DropAnimation,
+    MeasuringStrategy,
+    UniqueIdentifier,
+    defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
 import {
-	SortableContext,
-	arrayMove,
-	horizontalListSortingStrategy,
-	verticalListSortingStrategy,
+    SortableContext,
+    arrayMove,
+    horizontalListSortingStrategy,
+    verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createRange } from "../lib/createRange";
 import { Item } from "../lib/item";
 import { SortableItem } from "../lib/sortable_item";
 import { DroppableContainer } from "./droppable_container";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
+
+const dropAnimation: DropAnimation = {
+	sideEffects: defaultDropAnimationSideEffects({
+		styles: {
+			active: {
+				opacity: "0.5",
+			},
+		},
+	}),
+};
 
 export const MultipleContainers = () => {
 	const itemCount = 5;
@@ -176,6 +190,7 @@ export const MultipleContainers = () => {
 
 	return (
 		<DndContext
+			measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}
 			onDragEnd={handleDragEnd}
@@ -217,9 +232,18 @@ export const MultipleContainers = () => {
 					))}
 				</SortableContext>
 			</div>
-			<DragOverlay>
-				{activeId ? <Item id={activeId as number} /> : null}
-			</DragOverlay>
+			{createPortal(
+				<DragOverlay dropAnimation={dropAnimation}>
+					{activeId ? (
+						containers.includes(activeId) ? (
+							<div>container</div>
+						) : (
+							<Item id={activeId as number} />
+						)
+					) : null}
+				</DragOverlay>,
+				document.body,
+			)}
 		</DndContext>
 	);
 };
