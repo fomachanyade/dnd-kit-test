@@ -1,4 +1,6 @@
 import {
+    Active,
+    CollisionDetection,
     DndContext,
     DragEndEvent,
     DragOverEvent,
@@ -7,20 +9,26 @@ import {
     DropAnimation,
     MeasuringStrategy,
     UniqueIdentifier,
+    closestCenter,
     defaultDropAnimationSideEffects,
+    getFirstCollision,
+    pointerWithin,
+    rectIntersection,
 } from "@dnd-kit/core";
+import { DroppableContainer, RectMap } from "@dnd-kit/core/dist/store";
+import { ClientRect, Coordinates } from "@dnd-kit/core/dist/types";
 import {
     SortableContext,
     arrayMove,
     horizontalListSortingStrategy,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRange } from "../lib/createRange";
 import { Item } from "../lib/item";
 import { SortableItem } from "../lib/sortable_item";
-import { DroppableContainer } from "./droppable_container";
+import { DroppableContainer as DroppableContainerElement } from "./droppable_container";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
@@ -48,6 +56,7 @@ export const MultipleContainers = () => {
 	);
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 	const recentlyMovedToNewContainer = useRef(false);
+    const lastOverId = useRef<UniqueIdentifier | null>(null);
 
 	const findContainer = (id: UniqueIdentifier) => {
 		if (id in items) {
@@ -68,6 +77,71 @@ export const MultipleContainers = () => {
 
 		return index;
 	};
+
+    const collisionDetectionStrategy: CollisionDetection = useCallback(
+        (args:{
+            active: Active;
+            collisionRect: ClientRect;
+            droppableRects: RectMap;
+            droppableContainers: DroppableContainer[];
+            pointerCoordinates: Coordinates | null;
+        }) => {
+          if (activeId && activeId in items) {
+            return closestCenter({
+              ...args,
+              droppableContainers: args.droppableContainers.filter(
+                (container) => container.id in items
+              ),
+            });
+          }
+    
+          // Start by finding any intersecting droppable
+          const pointerIntersections = pointerWithin(args);
+          const intersections =
+            pointerIntersections.length > 0
+              ? // If there are droppables intersecting with the pointer, return those
+                pointerIntersections
+              : rectIntersection(args);
+          let overId = getFirstCollision(intersections, 'id');
+    
+          if (overId != null) {
+           
+    
+            if (overId in items) {
+              const containerItems = items[overId];
+    
+              // If a container is matched and it contains items (columns 'A', 'B', 'C')
+              if (containerItems.length > 0) {
+                // Return the closest droppable within that container
+                overId = closestCenter({
+                  ...args,
+                  droppableContainers: args.droppableContainers.filter(
+                    (container) =>
+                      container.id !== overId &&
+                      containerItems.includes(container.id)
+                  ),
+                })[0]?.id;
+              }
+            }
+    
+            lastOverId.current = overId;
+    
+            return [{id: overId}];
+          }
+    
+          // When a draggable item moves to a new container, the layout may shift
+          // and the `overId` may become `null`. We manually set the cached `lastOverId`
+          // to the id of the draggable item that was moved to the new container, otherwise
+          // the previous `overId` will be returned which can cause items to incorrectly shift positions
+          if (recentlyMovedToNewContainer.current) {
+            lastOverId.current = activeId;
+          }
+    
+          // If no droppable is matched, return the last match
+          return lastOverId.current ? [{id: lastOverId.current}] : [];
+        },
+        [activeId, items]
+      );
 
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
@@ -188,9 +262,16 @@ export const MultipleContainers = () => {
 		setClonedItems(null);
 	};
 
+    useEffect(() => {
+        requestAnimationFrame(() => {
+          recentlyMovedToNewContainer.current = false;
+        });
+      }, [items]);
+
 	return (
 		<DndContext
 			measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+            collisionDetection={collisionDetectionStrategy}
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}
 			onDragEnd={handleDragEnd}
@@ -209,7 +290,7 @@ export const MultipleContainers = () => {
 					strategy={horizontalListSortingStrategy}
 				>
 					{containers.map((containerId) => (
-						<DroppableContainer
+						<DroppableContainerElement
 							id={containerId}
 							items={items[containerId]}
 							key={containerId}
@@ -228,7 +309,7 @@ export const MultipleContainers = () => {
 									return <SortableItem id={value as number} />;
 								})}
 							</SortableContext>
-						</DroppableContainer>
+						</DroppableContainerElement>
 					))}
 				</SortableContext>
 			</div>
