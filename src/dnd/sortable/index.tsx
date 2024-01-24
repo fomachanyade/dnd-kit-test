@@ -18,8 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { useState } from "react";
 
-import { Item } from "../lib/item";
-import { SortableItem } from "../lib/sortable_item";
+import { Item } from "./item";
+import { SortableItem } from "./sortable_item";
 
 export const Sortable = () => {
 	const [activeId, setActiveId] = useState<number | null>(null);

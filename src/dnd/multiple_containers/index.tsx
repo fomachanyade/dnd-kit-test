@@ -26,8 +26,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRange } from "../lib/createRange";
-import { Item } from "../lib/item";
-import { SortableItem } from "../lib/sortable_item";
+import { Item } from "../sortable/item";
+import { SortableItem } from "../sortable/sortable_item";
 import { DroppableContainer as DroppableContainerElement } from "./droppable_container";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
