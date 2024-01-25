@@ -6,8 +6,6 @@ import styled from "styled-components";
 const ItemWrapper = styled.div<{ dragOverLay: boolean }>`
     display: flex;
     box-sizing: border-box;
-    transform: translate3d(30, 30, 0), 0)
-    scaleX(0.3) scaleY(0.3);
     transform-origin: 0 0;
     touch-action: manipulation;
     ${({ dragOverLay }) =>
@@ -45,15 +43,7 @@ export const Item = forwardRef<HTMLDivElement, ItemProps>((props, ref) => {
 		<ItemWrapper
 			ref={ref}
 			dragOverLay={dragOverlay}
-			style={{
-				transition: transition || undefined,
-				transform: transform
-					? `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scaleX}, ${transform.scaleY})`
-					: undefined,
-				opacity: fadeIn ? 0.5 : undefined,
-			}}
-			{...listeners}
-		>
+					>
 			{value}
 		</ItemWrapper>
 	);

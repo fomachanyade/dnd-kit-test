@@ -23,7 +23,7 @@ import { SortableItem } from "./sortable_item";
 
 export const Sortable = () => {
 	const [activeId, setActiveId] = useState<number | null>(null);
-	const [items, setItems] = useState([1, 2, 3]);
+	const [items, setItems] = useState([1, 2, 3, 4, 5]);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor),
@@ -40,6 +40,8 @@ export const Sortable = () => {
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
+
+		setActiveId(null);
 
 		if (!over) return;
 

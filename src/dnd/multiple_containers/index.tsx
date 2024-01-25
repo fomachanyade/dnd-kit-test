@@ -1,33 +1,30 @@
 import {
-    Active,
-    CollisionDetection,
-    DndContext,
-    DragEndEvent,
-    DragOverEvent,
-    DragOverlay,
-    DragStartEvent,
-    DropAnimation,
-    MeasuringStrategy,
-    UniqueIdentifier,
-    closestCenter,
-    defaultDropAnimationSideEffects,
-    getFirstCollision,
-    pointerWithin,
-    rectIntersection,
+	Active,
+	CollisionDetection,
+	DndContext,
+	DragEndEvent,
+	DragOverEvent,
+	DragStartEvent,
+	DropAnimation,
+	MeasuringStrategy,
+	UniqueIdentifier,
+	closestCenter,
+	defaultDropAnimationSideEffects,
+	getFirstCollision,
+	pointerWithin,
+	rectIntersection
 } from "@dnd-kit/core";
 import { DroppableContainer, RectMap } from "@dnd-kit/core/dist/store";
 import { ClientRect, Coordinates } from "@dnd-kit/core/dist/types";
 import {
-    SortableContext,
-    arrayMove,
-    horizontalListSortingStrategy,
-    verticalListSortingStrategy,
+	SortableContext,
+	arrayMove,
+	horizontalListSortingStrategy,
+	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { createRange } from "../lib/createRange";
 import { DroppableContainer as DroppableContainerElement } from "./droppable_container";
-import { Item } from "./item";
 import { SortableItem } from "./sortable_item";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -266,6 +263,8 @@ export const MultipleContainers = () => {
 		});
 	}, [items]);
 
+	console.log(items);
+
 	return (
 		<DndContext
 			measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
@@ -304,14 +303,14 @@ export const MultipleContainers = () => {
 								strategy={verticalListSortingStrategy}
 							>
 								{items[containerId].map((value, index) => {
-									return <SortableItem containerId={containerId} id={value as number} />;
+									return <SortableItem key={value} containerId={containerId} id={value as number} />;
 								})}
 							</SortableContext>
 						</DroppableContainerElement>
 					))}
 				</SortableContext>
 			</div>
-			{createPortal(
+			{/* {createPortal(
 				<DragOverlay dropAnimation={dropAnimation}>
 					{activeId ? (
 						containers.includes(activeId) ? (
@@ -322,7 +321,7 @@ export const MultipleContainers = () => {
 					) : null}
 				</DragOverlay>,
 				document.body,
-			)}
+			)} */}
 		</DndContext>
 	);
 };
